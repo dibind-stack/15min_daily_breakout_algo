@@ -30,9 +30,12 @@ The project is organized into the following directories:
 
 ## How to Set Up and Run
 
-1.  **Clone the repository:**
+> **Note for Interactive Environment Users:** If you are working in an interactive environment (like the one where this bot was created), the code files are already present. You can skip Step 1 and proceed directly to Step 2.
+
+1.  **Clone the repository (if on your local machine):**
     ```bash
-    git clone <repository_url>
+    # Replace YOUR_REPOSITORY_URL_HERE with the actual URL of the repository
+    git clone YOUR_REPOSITORY_URL_HERE
     cd <repository_directory>
     ```
 
@@ -84,9 +87,24 @@ The bot will initialize, connect to the Zerodha WebSocket, and start listening f
 - **PnL Guardrail:** It includes a daily PnL guardrail (`MAX_DAILY_DRAWDOWN_R` in `config.py`) to automatically stop trading for the day if losses exceed a specified limit in terms of 'R' (risk units).
 - **Google Sheets Logging:** A placeholder for a Google Sheets logger is included in `utils/g_sheets_logger.py`.
 
-## Important Notes for a Fully Automated Run
+## Go-Live Checklist
 
-- **The `access_token` is the ONLY manual step:** For the bot to be fully automated, one piece requires daily manual intervention. The Zerodha `ACCESS_TOKEN` expires each day. You must generate a new one and update it in `config.py` before starting the bot for the day.
-- **Live Trading Enabled:** The bot is now configured to place live orders with Zerodha. Please ensure your API keys in `config.py` are correct and you have sufficient funds before running `main.py`.
-- **Bot-Managed Stop-Loss:** It is critical to understand that this bot manages the stop-loss internally. It does **not** place a Stop-Loss (SL-M) order with the broker. Instead, it monitors the price and places a MARKET order if the stop-loss level is breached. This means you must have the bot running for your stop-loss to be active.
-- **Disclaimer:** This is a sample implementation for educational purposes. Trading in financial markets involves significant risk. Use this bot at your own risk.
+Before running this bot in a live market with real money, please review the following critical points:
+
+1.  **Daily `access_token` Generation (Manual Step):**
+    - The Zerodha `access_token` expires every morning. You **must** generate a new one via the Kite Connect login flow and update it in `config.py` before you start the bot each day. This is the only required manual step for daily operation.
+
+2.  **Start with Paper Trading or Low Capital:**
+    - It is highly recommended to first test the bot in a paper trading environment or with a very small amount of capital to ensure everything works as you expect.
+
+3.  **Understand Market Orders & Slippage:**
+    - The bot uses `MARKET` orders to ensure trades are executed quickly. In fast-moving markets, this can lead to "slippage," where the price you get is slightly different from the price at the moment the order was placed. This is a normal aspect of live trading.
+
+4.  **Server & Uptime:**
+    - For the bot to manage your trades correctly (especially the stop-loss, which is managed in-memory), it must run continuously during market hours. Deploy it on a reliable server or cloud VPS (Virtual Private Server), not on a personal computer that might shut down or lose internet connectivity.
+
+5.  **Bot-Managed Stop-Loss:**
+    - **CRITICAL:** The bot manages the stop-loss by watching the price and sending a `MARKET` order if the SL is hit. It does **not** place a pending SL-M order with the broker. If the bot crashes or stops running, your open position will **not** have a stop-loss order protecting it at the exchange. The State Persistence feature helps recover from restarts, but cannot protect against prolonged downtime.
+
+6.  **Disclaimer:**
+    - This is a complex piece of software provided for educational purposes. Trading in financial markets involves significant risk. Use this bot at your own risk.

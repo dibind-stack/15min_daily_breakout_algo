@@ -8,6 +8,8 @@ handle real-time data streams via WebSocket.
 
 import logging
 from kiteconnect import KiteConnect, KiteTicker
+from kiteconnect.exceptions import (TokenException, InputException, OrderException,
+                                    NetworkException, GeneralException)
 from kiteconnect.connect import (TRANSACTION_TYPE_BUY, TRANSACTION_TYPE_SELL,
                                  ORDER_TYPE_MARKET, PRODUCT_NRML, EXCHANGE_NFO,
                                  VARIETY_REGULAR)
@@ -80,9 +82,15 @@ class ZerodhaConnector:
             )
             logging.info(f"Order placed successfully. Order ID: {order_id}")
             return order_id
-        except Exception as e:
-            logging.error(f"Error placing order: {e}")
-            return None
+        except (TokenException, GeneralException) as e:
+            logging.error(f"Order placement failed due to an API error: {e}")
+            raise  # Re-raise the exception to be handled by the TradeManager
+        except (InputException, OrderException) as e:
+            logging.error(f"Order placement failed due to invalid input or order rules: {e}")
+            raise
+        except NetworkException as e:
+            logging.error(f"Order placement failed due to a network issue: {e}")
+            raise
 
     def get_historical_data(self, instrument_token, from_date, to_date, interval):
         """
@@ -110,7 +118,7 @@ class ZerodhaConnector:
             else:
                 logging.error("Could not find 'equity' segment or 'net' cash in margins response.")
                 return None
-        except Exception as e:
+        except (TokenException, GeneralException, NetworkException) as e:
             logging.error(f"Error fetching account margins: {e}")
             return None
 
@@ -142,7 +150,7 @@ class ZerodhaConnector:
 
             logging.error("Could not find an active NIFTY futures contract.")
             return None
-        except Exception as e:
+        except (TokenException, GeneralException, NetworkException) as e:
             logging.error(f"Error fetching NIFTY futures contract details: {e}")
             return None
 
