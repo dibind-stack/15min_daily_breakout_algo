@@ -105,8 +105,7 @@ I have created a helper script to make this process as easy as possible.
 5.  After you log in, you will be redirected to a new URL (your "redirect URL" which you configured in the Zerodha developer portal). This URL will contain a `request_token`. It will look something like this: `https://your-redirect-url.com/?status=success&request_token=THIS_IS_YOUR_REQUEST_TOKEN`.
 6.  Copy the entire `request_token` value from the URL.
 7.  Paste the `request_token` back into the terminal where the script is waiting and press Enter.
-8.  The script will then print your `access_token`.
-9.  Copy this final `access_token` and paste it into the `ACCESS_TOKEN` variable in your `config.py` file.
+8.  The script will automatically update your `config.py` file with the new `access_token`.
 
 You are now ready to start the bot for the day!
 
