@@ -82,6 +82,14 @@ def main():
             telegram.send_message("ALERT: Could not fetch account capital. Bot is shutting down.")
             return
 
+        # Fetch the current NIFTY futures trading symbol
+        nifty_futures_symbol = zerodha.get_current_nifty_futures_symbol()
+        if nifty_futures_symbol is None:
+            logging.error("Could not fetch NIFTY futures symbol. Exiting.")
+            telegram.send_message("ALERT: Could not fetch NIFTY futures symbol. Bot is shutting down.")
+            return
+        config.NIFTY_FUTURES_TRADING_SYMBOL = nifty_futures_symbol
+
         risk_manager = RiskManager(initial_capital=initial_capital)
         strategy = NoRsiBreakoutStrategy()
         trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, telegram)

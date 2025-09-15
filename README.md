@@ -76,14 +76,15 @@ The bot will initialize, connect to the Zerodha WebSocket, and start listening f
 
 ## Additional Features
 
-- **Dynamic Capital:** At startup, the bot automatically fetches your available capital from your Zerodha account to ensure risk calculations are based on your real-time balance.
+- **Dynamic Capital:** At startup, the bot automatically fetches your available capital from your Zerodha account.
+- **Dynamic Futures Symbol:** The bot automatically detects and trades the current month's NIFTY futures contract. You no longer need to change the symbol in `config.py` every month.
 - **Capital Scaling:** The bot uses a trailing equity high model to calculate risk, ensuring that profits are compounded while protecting against excessive risk after losses.
 - **PnL Guardrail:** It includes a daily PnL guardrail (`MAX_DAILY_DRAWDOWN_R` in `config.py`) to automatically stop trading for the day if losses exceed a specified limit in terms of 'R' (risk units).
-- **Google Sheets Logging:** A placeholder for a Google Sheets logger is included in `utils/g_sheets_logger.py`. This can be implemented to provide cloud-based logging of trades.
+- **Google Sheets Logging:** A placeholder for a Google Sheets logger is included in `utils/g_sheets_logger.py`.
 
-## Important Notes for Live Trading
+## Important Notes for a Fully Automated Run
 
-- **Access Token:** The Zerodha `ACCESS_TOKEN` needs to be generated daily. You will need to update it in `config.py` before running the bot each day.
+- **The `access_token` is the ONLY manual step:** For the bot to be fully automated, one piece requires daily manual intervention. The Zerodha `ACCESS_TOKEN` expires each day. You must generate a new one and update it in `config.py` before starting the bot for the day.
 - **Live Trading Enabled:** The bot is now configured to place live orders with Zerodha. Please ensure your API keys in `config.py` are correct and you have sufficient funds before running `main.py`.
 - **Bot-Managed Stop-Loss:** It is critical to understand that this bot manages the stop-loss internally. It does **not** place a Stop-Loss (SL-M) order with the broker. Instead, it monitors the price and places a MARKET order if the stop-loss level is breached. This means you must have the bot running for your stop-loss to be active.
 - **Disclaimer:** This is a sample implementation for educational purposes. Trading in financial markets involves significant risk. Use this bot at your own risk.

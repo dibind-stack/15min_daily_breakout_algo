@@ -114,6 +114,36 @@ class ZerodhaConnector:
             logging.error(f"Error fetching account margins: {e}")
             return None
 
+    def get_current_nifty_futures_symbol(self):
+        """
+        Fetches the tradingsymbol for the current month's NIFTY futures contract.
+        """
+        try:
+            instruments = self.kite.instruments('NFO')
+            nifty_futures = [
+                ins for ins in instruments
+                if ins['name'] == 'NIFTY'
+                and ins['instrument_type'] == 'FUT'
+            ]
+
+            # Sort by expiry date to find the nearest contract
+            nifty_futures.sort(key=lambda x: x['expiry'])
+
+            # Find the first contract that hasn't expired yet
+            from datetime import date
+            today = date.today()
+            for future in nifty_futures:
+                if future['expiry'] >= today:
+                    symbol = future['tradingsymbol']
+                    logging.info(f"Dynamically determined NIFTY futures symbol: {symbol}")
+                    return symbol
+
+            logging.error("Could not find an active NIFTY futures contract.")
+            return None
+        except Exception as e:
+            logging.error(f"Error fetching NIFTY futures symbol: {e}")
+            return None
+
     # --- Private WebSocket Callback Handlers ---
     def _on_connect(self, ws, response):
         """

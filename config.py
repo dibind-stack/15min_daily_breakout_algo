@@ -13,7 +13,7 @@ ACCESS_TOKEN = "YOUR_ACCESS_TOKEN"  # Generate this daily or store it securely
 # Zerodha Instrument Identifiers
 # You can get these from the Kite Connect instruments API call
 NIFTY_SPOT_INSTRUMENT_TOKEN = 256265  # Example for NIFTY 50
-NIFTY_FUTURES_TRADING_SYMBOL = "NIFTY24SEPFUT"  # Example, should be updated to current month
+NIFTY_FUTURES_TRADING_SYMBOL = None  # This will be fetched automatically at runtime
 
 # Strategy Parameters
 RISK_PER_TRADE_PERCENT = 2.0  # 2% of capital at risk per trade
