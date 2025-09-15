@@ -37,6 +37,9 @@ The project is organized into the following directories:
     # Replace YOUR_REPOSITORY_URL_HERE with the actual URL of the repository
     git clone YOUR_REPOSITORY_URL_HERE
     cd <repository_directory>
+    for e.g. 
+    cd ~/documents
+    git clone https://github.com/dibind-stack/15min_daily_breakout_algo.git
     ```
 
 2.  **Install dependencies:**
