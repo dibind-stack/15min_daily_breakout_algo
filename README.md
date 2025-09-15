@@ -45,6 +45,16 @@ The project is organized into the following directories:
 
 2.  **Install dependencies:**
     ```bash
+    # Step 1: Create a virtual environment (folder name: venv)
+    python3 -m venv venv
+
+    # Step 2: Activate it
+    source venv/bin/activate
+
+    # Step 3: Install requirements inside this venv
+    pip install -r requirements.txt
+    ```
+    ```
     pip install -r requirements.txt
     ```
 
