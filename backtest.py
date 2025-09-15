@@ -34,7 +34,7 @@ def run_backtest(data_file_path):
     log_header = ['timestamp', 'action', 'price', 'quantity', 'sl', 'target', 'pnl', 'reason', 'risk_r']
     logger = CsvLogger(file_path=backtest_log_path, header=log_header)
 
-    initial_capital = 4000000
+    initial_capital = 1200000
     risk_manager = RiskManager(initial_capital=initial_capital)
     strategy = NoRsiBreakoutStrategy()
     from datetime import date, timedelta
