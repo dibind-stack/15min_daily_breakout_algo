@@ -21,7 +21,7 @@ MAX_CAPITAL_ALLOCATION_PERCENT = 50.0  # Use max 50% of capital for a trade
 TARGET_RISK_REWARD_RATIO = 5.0  # 5R target
 
 # NIFTY Futures Contract Details
-NIFTY_LOT_SIZE = 50  # As of my last update, but verify this
+NIFTY_LOT_SIZE = 75  # As per the prompt's risk management section
 
 # Telegram Bot for Alerts
 TELEGRAM_BOT_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
