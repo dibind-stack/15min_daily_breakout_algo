@@ -77,6 +77,7 @@ The bot will initialize, connect to the Zerodha WebSocket, and start listening f
 ## Additional Features
 
 - **Dynamic Capital:** At startup, the bot automatically fetches your available capital from your Zerodha account.
+- **State Persistence:** The bot saves the state of any active trade to a `trade_state.json` file. This makes the bot resilient to restarts and crashes. If the bot is restarted while a trade is active, it will automatically load the trade's state and continue managing it correctly.
 - **Dynamic Futures Symbol:** The bot automatically detects and trades the current month's NIFTY futures contract.
 - **Pre-Expiry Risk Management:** The bot will automatically exit any open positions and stop entering new ones a configurable number of days before the contract expires (see `DAYS_BEFORE_EXPIRY_TO_EXIT` in `config.py`). This helps to avoid expiry-day volatility.
 - **Capital Scaling:** The bot uses a trailing equity high model to calculate risk, ensuring that profits are compounded while protecting against excessive risk after losses.

@@ -11,6 +11,7 @@ import pandas as pd
 import config
 from connectors.zerodha_connector import (TRANSACTION_TYPE_BUY, TRANSACTION_TYPE_SELL,
                                           ORDER_TYPE_MARKET)
+from utils.state_manager import save_state, load_state
 
 class TradeManager:
     """
@@ -23,6 +24,13 @@ class TradeManager:
         self.logger = logger
         self.telegram = telegram_bot
         self.expiry_date = expiry_date
+
+        # Load state from file on startup
+        self.active_trade = load_state()
+        if self.active_trade:
+            logging.info(f"Loaded active trade from state file: {self.active_trade}")
+            # Ensure strategy knows a trade is active
+            self.strategy.trade_active = True
 
         self.day_reset()
         logging.info(f"TradeManager initialized for contract expiring on {self.expiry_date}.")
@@ -109,6 +117,9 @@ class TradeManager:
         }
         self.trailing_sl_activated = False
 
+        # Persist the state to file
+        save_state(self.active_trade)
+
         msg = (f"--- NEW TRADE INITIATED ---\n"
                f"Symbol: {config.NIFTY_FUTURES_TRADING_SYMBOL}\n"
                f"Entry: {entry_price:.2f}\n"
@@ -157,6 +168,8 @@ class TradeManager:
                 self.telegram.send_message(msg)
                 self.logger.log({'timestamp': current_candle['timestamp'], 'action': 'TSL_UPDATE', 'price': new_sl})
                 logging.info(msg)
+                # Persist the updated SL
+                save_state(self.active_trade)
 
     def exit_trade(self, timestamp, exit_price, reason):
         """
@@ -210,6 +223,9 @@ class TradeManager:
         self.active_trade = None
         self.trailing_sl_activated = False
         self.strategy.on_trade_exit()
+
+        # Clear the state file as there is no active trade
+        save_state(None)
 
     def handle_gap_down(self, opening_price, timestamp):
         """
