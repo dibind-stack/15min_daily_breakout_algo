@@ -37,24 +37,10 @@ The project is organized into the following directories:
     # Replace YOUR_REPOSITORY_URL_HERE with the actual URL of the repository
     git clone YOUR_REPOSITORY_URL_HERE
     cd <repository_directory>
-    for e.g. 
-    cd ~/documents
-    git clone https://github.com/dibind-stack/15min_daily_breakout_algo.git
-    cd 15min_daily_breakout_algo
     ```
 
 2.  **Install dependencies:**
     ```bash
-    # Step 1: Create a virtual environment (folder name: venv)
-    python3 -m venv venv
-
-    # Step 2: Activate it
-    source venv/bin/activate
-
-    # Step 3: Install requirements inside this venv
-    pip install -r requirements.txt
-    ```
-    ```
     pip install -r requirements.txt
     ```
 
@@ -101,12 +87,35 @@ The bot will initialize, connect to the Zerodha WebSocket, and start listening f
 - **PnL Guardrail:** It includes a daily PnL guardrail (`MAX_DAILY_DRAWDOWN_R` in `config.py`) to automatically stop trading for the day if losses exceed a specified limit in terms of 'R' (risk units).
 - **Google Sheets Logging:** A placeholder for a Google Sheets logger is included in `utils/g_sheets_logger.py`.
 
+## Generating Your Daily Access Token
+
+The single most important manual step you must perform each day is generating a new `access_token`. This token allows the bot to connect to your Zerodha account and is valid for one trading day.
+
+I have created a helper script to make this process as easy as possible.
+
+**To generate your token:**
+
+1.  Make sure your `API_KEY` and `API_SECRET` are correctly filled out in `config.py`.
+2.  Run the helper script from your terminal:
+    ```bash
+    python generate_access_token.py
+    ```
+3.  The script will print a login URL. Copy this URL and paste it into your web browser.
+4.  Log in to Zerodha using your credentials.
+5.  After you log in, you will be redirected to a new URL (your "redirect URL" which you configured in the Zerodha developer portal). This URL will contain a `request_token`. It will look something like this: `https://your-redirect-url.com/?status=success&request_token=THIS_IS_YOUR_REQUEST_TOKEN`.
+6.  Copy the entire `request_token` value from the URL.
+7.  Paste the `request_token` back into the terminal where the script is waiting and press Enter.
+8.  The script will then print your `access_token`.
+9.  Copy this final `access_token` and paste it into the `ACCESS_TOKEN` variable in your `config.py` file.
+
+You are now ready to start the bot for the day!
+
 ## Go-Live Checklist
 
 Before running this bot in a live market with real money, please review the following critical points:
 
-1.  **Daily `access_token` Generation (Manual Step):**
-    - The Zerodha `access_token` expires every morning. You **must** generate a new one via the Kite Connect login flow and update it in `config.py` before you start the bot each day. This is the only required manual step for daily operation.
+1.  **Daily `access_token` Generation:**
+    - Use the `generate_access_token.py` script every morning to get your new token and update `config.py`.
 
 2.  **Start with Paper Trading or Low Capital:**
     - It is highly recommended to first test the bot in a paper trading environment or with a very small amount of capital to ensure everything works as you expect.
