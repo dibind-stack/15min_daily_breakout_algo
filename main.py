@@ -82,17 +82,17 @@ def main():
             telegram.send_message("ALERT: Could not fetch account capital. Bot is shutting down.")
             return
 
-        # Fetch the current NIFTY futures trading symbol
-        nifty_futures_symbol = zerodha.get_current_nifty_futures_symbol()
-        if nifty_futures_symbol is None:
-            logging.error("Could not fetch NIFTY futures symbol. Exiting.")
-            telegram.send_message("ALERT: Could not fetch NIFTY futures symbol. Bot is shutting down.")
+        # Fetch the current NIFTY futures contract details (symbol and expiry)
+        futures_contract = zerodha.get_current_nifty_futures_contract()
+        if futures_contract is None:
+            logging.error("Could not fetch NIFTY futures contract details. Exiting.")
+            telegram.send_message("ALERT: Could not fetch NIFTY futures contract. Bot is shutting down.")
             return
-        config.NIFTY_FUTURES_TRADING_SYMBOL = nifty_futures_symbol
+        config.NIFTY_FUTURES_TRADING_SYMBOL = futures_contract['tradingsymbol']
 
         risk_manager = RiskManager(initial_capital=initial_capital)
         strategy = NoRsiBreakoutStrategy()
-        trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, telegram)
+        trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, telegram, expiry_date=futures_contract['expiry'])
     except Exception as e:
         logging.error(f"Failed to initialize components: {e}")
         return

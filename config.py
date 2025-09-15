@@ -40,3 +40,6 @@ ORDER_VARIETY = "REGULAR"  # Regular order
 
 # PnL Guardrail (Optional)
 MAX_DAILY_DRAWDOWN_R = -2.5  # Stop trading for the day if loss exceeds -2.5R
+
+# Expiry Settings
+DAYS_BEFORE_EXPIRY_TO_EXIT = 3  # Force exit X days before contract expiry

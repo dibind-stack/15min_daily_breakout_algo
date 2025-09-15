@@ -16,15 +16,16 @@ class TradeManager:
     """
     Manages the execution and lifecycle of a single trade at a time.
     """
-    def __init__(self, zerodha_connector, risk_manager, strategy, logger, telegram_bot):
+    def __init__(self, zerodha_connector, risk_manager, strategy, logger, telegram_bot, expiry_date):
         self.zerodha = zerodha_connector
         self.risk_manager = risk_manager
         self.strategy = strategy
         self.logger = logger
         self.telegram = telegram_bot
+        self.expiry_date = expiry_date
 
         self.day_reset()
-        logging.info("TradeManager initialized.")
+        logging.info(f"TradeManager initialized for contract expiring on {self.expiry_date}.")
 
     def day_reset(self):
         """
@@ -34,6 +35,21 @@ class TradeManager:
         self.daily_r_pnl = 0.0
         self.trading_stopped_for_day = False
         logging.info("Daily counters (PnL guardrail) have been reset.")
+
+    def _is_in_expiry_window(self, today_date=None):
+        """
+        Checks if the current date is within the no-trade window before expiry.
+        """
+        from datetime import date, timedelta
+
+        if not today_date:
+            today_date = date.today()
+
+        days_to_expiry = (self.expiry_date - today_date).days
+
+        if days_to_expiry <= config.DAYS_BEFORE_EXPIRY_TO_EXIT:
+            return True
+        return False
 
     def enter_trade(self, signal):
         """
@@ -45,6 +61,10 @@ class TradeManager:
 
         if self.trading_stopped_for_day:
             logging.warning(f"Cannot enter new trade, daily loss limit of {config.MAX_DAILY_DRAWDOWN_R}R reached.")
+            return
+
+        if self._is_in_expiry_window(today_date=signal['timestamp'].date()):
+            logging.warning(f"Cannot enter new trade, it's within {config.DAYS_BEFORE_EXPIRY_TO_EXIT} days of expiry.")
             return
 
         entry_price = signal['entry_price']
@@ -101,8 +121,16 @@ class TradeManager:
     def check_and_manage_trade(self, current_candle):
         """
         Checks the active trade against the latest candle data for exit conditions.
+        Also handles forced exits due to pre-expiry window.
         """
         if not self.active_trade:
+            return
+
+        # --- 1. Check for Forced Expiry Exit ---
+        candle_date = current_candle['timestamp'].date()
+        if self._is_in_expiry_window(today_date=candle_date):
+            logging.warning(f"Forcing exit for active trade. Reason: Entering expiry window.")
+            self.exit_trade(current_candle['timestamp'], current_candle['close'], "EXPIRY_FORCED_EXIT")
             return
 
         low_price = current_candle['low']
