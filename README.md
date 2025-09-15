@@ -40,6 +40,7 @@ The project is organized into the following directories:
     for e.g. 
     cd ~/documents
     git clone https://github.com/dibind-stack/15min_daily_breakout_algo.git
+    cd 15min_daily_breakout_algo
     ```
 
 2.  **Install dependencies:**
