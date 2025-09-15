@@ -27,12 +27,13 @@ class TradeManager:
         logging.info("TradeManager initialized.")
 
     def day_reset(self):
-        """Resets daily counters and flags."""
-        self.active_trade = None
-        self.trailing_sl_activated = False
+        """
+        Resets daily counters and flags, but preserves an active trade
+        if it's being carried overnight.
+        """
         self.daily_r_pnl = 0.0
         self.trading_stopped_for_day = False
-        logging.info("TradeManager state has been reset for the new day.")
+        logging.info("Daily counters (PnL guardrail) have been reset.")
 
     def enter_trade(self, signal):
         """
