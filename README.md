@@ -48,10 +48,29 @@ The project is organized into the following directories:
         - Your `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`.
         - Adjust `NIFTY_LOT_SIZE` if it has changed.
 
-4.  **Run the bot:**
+4.  **Run the Live Trading Bot:**
     ```bash
     python main.py
     ```
+
+## Backtesting
+
+To backtest the strategy on historical data, use the `backtest.py` script.
+
+**Running with Your Own Data:**
+
+You can run the backtest on your own historical data file by using the `--data` command-line argument.
+
+1.  **Prepare your data file:**
+    - The CSV file must contain the following columns: `date`, `open`, `high`, `low`, `close`.
+    - The `date` column should have timestamps in a format that pandas can recognize (e.g., `YYYY-MM-DD HH:MM:SS`).
+
+2.  **Run the backtest script:**
+    ```bash
+    python backtest.py --data /path/to/your/data.csv
+    ```
+
+If you don't provide a data file, it will automatically run on the included `nifty_15min_sample.csv` file.
 
 The bot will initialize, connect to the Zerodha WebSocket, and start listening for NIFTY Spot ticks. It will automatically form 15-minute candles and apply the strategy rules to manage trades.
 
