@@ -95,6 +95,25 @@ class ZerodhaConnector:
             logging.error(f"Error fetching historical data: {e}")
             return []
 
+    def get_margins(self):
+        """
+        Fetches the available capital from the user's account.
+        Specifically retrieves the 'net' cash available in the equity segment.
+        """
+        try:
+            margins = self.kite.margins()
+            equity_margins = margins.get("equity")
+            if equity_margins and 'net' in equity_margins:
+                net_cash = equity_margins['net']
+                logging.info(f"Successfully fetched account margins. Net cash available: {net_cash}")
+                return net_cash
+            else:
+                logging.error("Could not find 'equity' segment or 'net' cash in margins response.")
+                return None
+        except Exception as e:
+            logging.error(f"Error fetching account margins: {e}")
+            return None
+
     # --- Private WebSocket Callback Handlers ---
     def _on_connect(self, ws, response):
         """

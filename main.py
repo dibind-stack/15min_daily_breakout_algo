@@ -75,7 +75,13 @@ def main():
         logger = CsvLogger(file_path=config.LOG_FILE_PATH, header=['timestamp', 'action', 'price', 'quantity', 'pnl', 'reason', 'sl', 'target', 'risk_r'])
         telegram = TelegramBot(token=config.TELEGRAM_BOT_TOKEN, chat_id=config.TELEGRAM_CHAT_ID)
 
-        initial_capital = 100000  # This should be fetched from the broker
+        # Fetch available capital from the broker
+        initial_capital = zerodha.get_margins()
+        if initial_capital is None:
+            logging.error("Could not fetch initial capital. Exiting.")
+            telegram.send_message("ALERT: Could not fetch account capital. Bot is shutting down.")
+            return
+
         risk_manager = RiskManager(initial_capital=initial_capital)
         strategy = NoRsiBreakoutStrategy()
         trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, telegram)

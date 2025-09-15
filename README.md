@@ -76,6 +76,7 @@ The bot will initialize, connect to the Zerodha WebSocket, and start listening f
 
 ## Additional Features
 
+- **Dynamic Capital:** At startup, the bot automatically fetches your available capital from your Zerodha account to ensure risk calculations are based on your real-time balance.
 - **Capital Scaling:** The bot uses a trailing equity high model to calculate risk, ensuring that profits are compounded while protecting against excessive risk after losses.
 - **PnL Guardrail:** It includes a daily PnL guardrail (`MAX_DAILY_DRAWDOWN_R` in `config.py`) to automatically stop trading for the day if losses exceed a specified limit in terms of 'R' (risk units).
 - **Google Sheets Logging:** A placeholder for a Google Sheets logger is included in `utils/g_sheets_logger.py`. This can be implemented to provide cloud-based logging of trades.
