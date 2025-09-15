@@ -37,7 +37,10 @@ def run_backtest(data_file_path):
     initial_capital = 4000000
     risk_manager = RiskManager(initial_capital=initial_capital)
     strategy = NoRsiBreakoutStrategy()
-    trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, MockTelegramBot())
+    from datetime import date, timedelta
+    dummy_expiry_date = date.today() + timedelta(days=365)
+    trade_manager = TradeManager(zerodha, risk_manager, strategy, logger, MockTelegramBot(),
+                                 expiry_date=dummy_expiry_date, backtest_mode=True)
 
     logging.info("Backtest components initialized.")
 

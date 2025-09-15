@@ -10,10 +10,15 @@ import logging
 from kiteconnect import KiteConnect, KiteTicker
 from kiteconnect.exceptions import (TokenException, InputException, OrderException,
                                     NetworkException, GeneralException)
-from kiteconnect.connect import (TRANSACTION_TYPE_BUY, TRANSACTION_TYPE_SELL,
-                                 ORDER_TYPE_MARKET, PRODUCT_NRML, EXCHANGE_NFO,
-                                 VARIETY_REGULAR)
 import config
+
+# Define constants at the module level by accessing them from the KiteConnect class
+TRANSACTION_TYPE_BUY = KiteConnect.TRANSACTION_TYPE_BUY
+TRANSACTION_TYPE_SELL = KiteConnect.TRANSACTION_TYPE_SELL
+ORDER_TYPE_MARKET = KiteConnect.ORDER_TYPE_MARKET
+PRODUCT_NRML = KiteConnect.PRODUCT_NRML
+EXCHANGE_NFO = KiteConnect.EXCHANGE_NFO
+VARIETY_REGULAR = KiteConnect.VARIETY_REGULAR
 
 logging.basicConfig(level=logging.INFO)
 

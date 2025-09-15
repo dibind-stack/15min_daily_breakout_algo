@@ -17,13 +17,14 @@ class TradeManager:
     """
     Manages the execution and lifecycle of a single trade at a time.
     """
-    def __init__(self, zerodha_connector, risk_manager, strategy, logger, telegram_bot, expiry_date):
+    def __init__(self, zerodha_connector, risk_manager, strategy, logger, telegram_bot, expiry_date, backtest_mode=False):
         self.zerodha = zerodha_connector
         self.risk_manager = risk_manager
         self.strategy = strategy
         self.logger = logger
         self.telegram = telegram_bot
         self.expiry_date = expiry_date
+        self.backtest_mode = backtest_mode
 
         # Load state from file on startup
         self.active_trade = load_state()
@@ -84,23 +85,29 @@ class TradeManager:
             self.strategy.on_trade_exit() # Reset strategy state
             return
 
-        # --- Place Live Entry Order ---
-        try:
-            logging.info("Placing live entry order...")
-            order_id = self.zerodha.place_order(
-                tradingsymbol=config.NIFTY_FUTURES_TRADING_SYMBOL,
-                exchange=config.EXCHANGE,
-                transaction_type=TRANSACTION_TYPE_BUY,
-                quantity=quantity,
-                product=config.PRODUCT_TYPE,
-                order_type=ORDER_TYPE_MARKET
-            )
-            logging.info(f"Live entry order placed successfully. Order ID: {order_id}")
-        except Exception as e:
-            logging.error(f"Failed to place live entry order: {e}")
-            self.telegram.send_message(f"ALERT: Failed to place entry order: {e}")
-            self.strategy.on_trade_exit() # Reset strategy state
-            return
+        # --- Place Entry Order ---
+        order_id = None
+        if not self.backtest_mode:
+            try:
+                logging.info("Placing live entry order...")
+                order_id = self.zerodha.place_order(
+                    tradingsymbol=config.NIFTY_FUTURES_TRADING_SYMBOL,
+                    exchange=config.EXCHANGE,
+                    transaction_type=TRANSACTION_TYPE_BUY,
+                    quantity=quantity,
+                    product=config.PRODUCT_TYPE,
+                    order_type=ORDER_TYPE_MARKET
+                )
+                logging.info(f"Live entry order placed successfully. Order ID: {order_id}")
+            except Exception as e:
+                logging.error(f"Failed to place live entry order: {e}")
+                self.telegram.send_message(f"ALERT: Failed to place entry order: {e}")
+                self.strategy.on_trade_exit() # Reset strategy state
+                return
+        else:
+            # In backtest mode, simulate the order ID
+            order_id = f"simulated_entry_{pd.Timestamp.now().timestamp()}"
+            logging.info(f"SIMULATING entry order for {quantity} units. Order ID: {order_id}")
 
         initial_risk_per_share = entry_price - sl_price
         target_price = entry_price + (initial_risk_per_share * config.TARGET_RISK_REWARD_RATIO)
@@ -178,23 +185,26 @@ class TradeManager:
         if not self.active_trade:
             return
 
-        # --- Place Live Exit Order ---
-        try:
-            logging.info(f"Placing live exit order for reason: {reason}")
-            exit_order_id = self.zerodha.place_order(
-                tradingsymbol=config.NIFTY_FUTURES_TRADING_SYMBOL,
-                exchange=config.EXCHANGE,
-                transaction_type=TRANSACTION_TYPE_SELL,
-                quantity=self.active_trade['quantity'],
-                product=config.PRODUCT_TYPE,
-                order_type=ORDER_TYPE_MARKET
-            )
-            logging.info(f"Live exit order placed successfully. Order ID: {exit_order_id}")
-        except Exception as e:
-            logging.error(f"CRITICAL: Failed to place live exit order: {e}")
-            self.telegram.send_message(f"CRITICAL ALERT: FAILED TO EXIT TRADE! REASON: {e}. MANUAL INTERVENTION REQUIRED.")
-            # Don't reset state here, so we can try to exit again on the next candle
-            return
+        # --- Place Exit Order ---
+        if not self.backtest_mode:
+            try:
+                logging.info(f"Placing live exit order for reason: {reason}")
+                exit_order_id = self.zerodha.place_order(
+                    tradingsymbol=config.NIFTY_FUTURES_TRADING_SYMBOL,
+                    exchange=config.EXCHANGE,
+                    transaction_type=TRANSACTION_TYPE_SELL,
+                    quantity=self.active_trade['quantity'],
+                    product=config.PRODUCT_TYPE,
+                    order_type=ORDER_TYPE_MARKET
+                )
+                logging.info(f"Live exit order placed successfully. Order ID: {exit_order_id}")
+            except Exception as e:
+                logging.error(f"CRITICAL: Failed to place live exit order: {e}")
+                self.telegram.send_message(f"CRITICAL ALERT: FAILED TO EXIT TRADE! REASON: {e}. MANUAL INTERVENTION REQUIRED.")
+                # Don't reset state here, so we can try to exit again on the next candle
+                return
+        else:
+            logging.info(f"SIMULATING exit order for reason: {reason}")
 
         pnl = (exit_price - self.active_trade['entry_price']) * self.active_trade['quantity']
         # Calculate PnL in terms of R
